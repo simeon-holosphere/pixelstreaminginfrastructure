@@ -13,6 +13,7 @@ import { beautify, IProgramOptions } from './Utils';
 import { initInputHandler } from './InputHandler';
 import { Command, Option } from 'commander';
 import { initialize } from 'express-openapi';
+import authRouter from './auth';
 
 // eslint-disable-next-line  @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment
 const pjson = require('../package.json');
@@ -197,6 +198,9 @@ if (options.log_config) {
 }
 
 const app = express();
+
+app.use(express.json());
+app.use(authRouter);
 
 const serverOpts: IServerConfig = {
     streamerPort: options.streamer_port,

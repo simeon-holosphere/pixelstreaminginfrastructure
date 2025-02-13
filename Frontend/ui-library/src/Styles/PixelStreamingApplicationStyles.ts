@@ -510,6 +510,59 @@ export class PixelStreamingApplicationStyle {
         },
         '.svgIcon': {
             fill: 'var(--color2)'
+        },
+        '#authContainer': {
+            position: 'fixed',
+            inset: '0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(0, 26, 41, 0.95)'
+        },
+        '#authContainer > div': {
+            width: '384px',
+            backgroundColor: 'white',
+            borderRadius: '0.5rem',
+            padding: '2rem'
+        },
+        '#authContainer h2': {
+            fontSize: '1.5rem',
+            fontWeight: 'bold',
+            marginBottom: '1.5rem',
+            color: '#111827',
+            letterSpacing: '0.05em'
+        },
+        '#authContainer form': {
+            width: '100%' // Added to ensure form takes full width
+        },
+        '#authContainer input': {
+            width: '100%',
+            padding: '0.5rem 0.75rem',
+            borderRadius: '0.25rem',
+            border: '1px solid #E5E7EB',
+            outline: 'none',
+            transition: 'border-color 0.2s',
+            fontSize: '0.875rem',
+            boxSizing: 'border-box' // Added to include padding in width calculation
+        },
+        '#authContainer input:focus': {
+            borderColor: '#06B6D4'
+        },
+        '#authContainer button': {
+            width: '100%',
+            padding: '0.5rem',
+            backgroundColor: '#06B6D4',
+            color: 'white',
+            borderRadius: '0.25rem',
+            border: 'none',
+            cursor: 'pointer',
+            transition: 'background-color 0.2s',
+            fontSize: '0.875rem',
+            fontWeight: '500',
+            boxSizing: 'border-box' // Added to include padding in width calculation
+        },
+        '#authContainer button:hover': {
+            backgroundColor: '#0891B2'
         }
     };
 
