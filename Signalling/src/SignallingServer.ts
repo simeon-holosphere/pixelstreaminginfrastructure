@@ -1,6 +1,7 @@
 import http from 'http';
 import https from 'https';
 import WebSocket from 'ws';
+import ngrok from '@ngrok/ngrok';
 import { StreamerConnection } from './StreamerConnection';
 import { PlayerConnection } from './PlayerConnection';
 import { SFUConnection } from './SFUConnection';
@@ -44,6 +45,20 @@ export interface IServerConfig {
 
     // Max number of players per streamer.
     maxSubscribers?: number;
+    
+    // Add ngrok-specific configuration
+    ngrok?: {
+        enabled: boolean;
+        authToken?: string;
+        oauth?: {
+            provider: string;
+            allow_emails: string[];
+        };
+        basicAuth?: {
+            username: string;
+            password: string;
+        };
+    }
 }
 
 export type ProtocolConfig = {
@@ -56,11 +71,15 @@ export type ProtocolConfig = {
  * to listen for incoming connections.
  */
 export class SignallingServer {
-    config: IServerConfig;
-    protocolConfig: ProtocolConfig;
-    streamerRegistry: StreamerRegistry;
-    playerRegistry: PlayerRegistry;
-    startTime: Date;
+    public config: IServerConfig;
+    public protocolConfig: ProtocolConfig;
+    public streamerRegistry: StreamerRegistry;
+    public playerRegistry: PlayerRegistry;
+    public startTime: Date;
+    private ngrokListener: any;
+    private streamerServer: WebSocket.Server | null = null;
+    private playerServer: WebSocket.Server | null = null;
+    private sfuServer: WebSocket.Server | null = null;
 
     /**
      * Initializes the server object and sets up listening sockets for streamers
@@ -83,40 +102,127 @@ export class SignallingServer {
             Logger.error('No player port, http server or https server supplied to SignallingServer.');
             return;
         }
+    }
 
-        // Streamer connections
-        const streamerServer = new WebSocket.WebSocketServer({
-            port: config.streamerPort,
-            backlog: 1,
-            ...config.streamerWsOptions
-        });
-        streamerServer.on('connection', this.onStreamerConnected.bind(this));
-        Logger.info(`Listening for streamer connections on port ${config.streamerPort}`);
+    public async initialize(): Promise<void> {
+        try {
+            // Set up ngrok if enabled
+            if (this.config.ngrok?.enabled) {
+                await this.setupNgrok();
+            }
 
-        // Player connections
-        const server = config.httpsServer || config.httpServer;
-        const playerServer = new WebSocket.Server({
-            server: server,
-            port: server ? undefined : config.playerPort,
-            ...config.playerWsOptions
-        });
-        playerServer.on('connection', this.onPlayerConnected.bind(this));
-        if (!config.httpServer && !config.httpsServer) {
-            Logger.info(`Listening for player connections on port ${config.playerPort}`);
-        }
-
-        // Optional SFU connections
-        if (config.sfuPort) {
-            const sfuServer = new WebSocket.Server({
-                port: config.sfuPort,
-                backlog: 1,
-                ...config.sfuWsOptions
-            });
-            sfuServer.on('connection', this.onSFUConnected.bind(this));
-            Logger.info(`Listening for SFU connections on port ${config.sfuPort}`);
+            // Set up websocket servers
+            await this.setupWebSocketServers();
+        } catch (error) {
+            Logger.error('Failed to initialize SignallingServer: ', error);
+            throw error;
         }
     }
 
+    private async setupNgrok() {
+        try {
+            const server = this.config.httpsServer || this.config.httpServer;
+            const port = server ? (server.address() as any).port : this.config.playerPort;
+
+            const ngrokConfig: any = {
+                addr: port,
+                authtoken: this.config.ngrok?.authToken
+            };
+
+            // Handle OAuth configuration
+            if (this.config.ngrok?.oauth) {
+                const oauthConfig = {
+                    provider: this.config.ngrok.oauth.provider,
+                    allow_emails: this.config.ngrok.oauth.allow_emails
+                };
+                ngrokConfig.oauth = oauthConfig;
+            }
+
+            // Handle basic auth configuration
+            if (this.config.ngrok?.basicAuth) {
+                const basicAuthConfig = `${this.config.ngrok.basicAuth.username}:${this.config.ngrok.basicAuth.password}`;
+                ngrokConfig.authtoken_from_env = false;
+                ngrokConfig.basic_auth = basicAuthConfig;
+            }
+
+            this.ngrokListener = await ngrok.forward(ngrokConfig);
+
+            const publicUrl = this.ngrokListener.url();
+            Logger.info(`Ngrok tunnel established at: ${publicUrl}`);
+            
+            if (this.protocolConfig['peerConnectionOptions']) {
+                this.protocolConfig['peerConnectionOptions']['publicUrl'] = publicUrl;
+            }
+        } catch(error) {
+            Logger.error('Failed to setup ngrok: ', error);
+            if (error instanceof Error) {
+                throw new Error(`Ngrok setup failed: ${error.message}`);
+            } else {
+                throw new Error('Ngrok setup failed with unknown error');
+            }
+        }
+    }
+    //if (this.protocolConfig['peerConnectionOptions']) {
+    //this.protocolConfig['peerConnectionOptions']['publicUrl'] = publicUrl;
+
+    
+    private async setupWebSocketServers() {
+        // Streamer connections
+        const streamerServer = new WebSocket.WebSocketServer({
+            port: this.config.streamerPort,
+            backlog: 1,
+            ...this.config.streamerWsOptions
+        });
+        streamerServer.on('connection', this.onStreamerConnected.bind(this));
+        Logger.info(`Listening for streamer connections on port ${this.config.streamerPort}`);
+
+        // Player connections
+        const server = this.config.httpsServer || this.config.httpServer;
+        const playerServer = new WebSocket.Server({
+            server: server,
+            port: server ? undefined : this.config.playerPort,
+            ...this.config.playerWsOptions
+        });
+        playerServer.on('connection', this.onPlayerConnected.bind(this));
+        if (!this.config.httpServer && !this.config.httpsServer) {
+            Logger.info(`Listening for player connections on port ${this.config.playerPort}`);
+        }
+
+        // Optional SFU connections
+        if (this.config.sfuPort) {
+            const sfuServer = new WebSocket.Server({
+                port: this.config.sfuPort,
+                backlog: 1,
+                ...this.config.sfuWsOptions
+            });
+            sfuServer.on('connection', this.onSFUConnected.bind(this));
+            Logger.info(`Listening for SFU connections on port ${this.config.sfuPort}`);
+        } 
+    }
+
+    public async shutdown(): Promise<void> {
+        try {
+            if (this.ngrokListener) {
+                await this.ngrokListener.close();
+                Logger.info('Ngrok tunnel closed');
+            }
+
+            // Close all WebSocket servers
+            if (this.streamerServer) {
+                this.streamerServer.close();
+            }
+            if (this.playerServer) {
+                this.playerServer.close();
+            }
+            if (this.sfuServer) {
+                this.sfuServer.close();
+            }
+        } catch(error) {
+            Logger.error('Error during shutdown:', error);
+            throw error;
+        }
+    }
+    
     private onStreamerConnected(ws: WebSocket, request: http.IncomingMessage) {
         Logger.info(`New streamer connection: %s`, request.socket.remoteAddress);
 

@@ -159,6 +159,17 @@ program
         'After arguments are parsed the config.json is saved with whatever arguments were specified at launch.',
         config_file.save || false
     )
+    .addOption(
+        new Option('--ngrok <json>', 'Ngrok configuration as JSON object')
+            .argParser(JSON.parse)
+            .default(config_file.ngrok || {
+                enabled: false,
+                oauth: {
+                    provider: 'google',
+                    allow_emails: ['*']
+                }
+            })
+    )
     .helpOption('-h, --help', 'Display this help text.')
     .allowUnknownOption() // ignore unknown options which will allow versions to be swapped out into existing scripts with maybe older/newer options
     .parse();
@@ -207,7 +218,8 @@ const serverOpts: IServerConfig = {
     playerPort: options.player_port,
     sfuPort: options.sfu_port,
     peerOptions: options.peer_options,
-    maxSubscribers: options.max_players
+    maxSubscribers: options.max_players,
+    ngrok: options.ngrok
 };
 
 if (options.serve) {
@@ -238,19 +250,29 @@ if (options.serve) {
 
 const signallingServer = new SignallingServer(serverOpts);
 
-if (options.stdin) {
-    initInputHandler(options, signallingServer);
-}
+// Wrap the initialization in an async IIFE
+(async () => {
+    try {
+        await signallingServer.initialize();
 
-if (options.rest_api) {
-    void initialize({
-        app,
-        docsPath: '/api-definition',
-        exposeApiDocs: true,
-        apiDoc: './apidoc/api-definition-base.yml',
-        paths: './dist/paths',
-        dependencies: {
-            signallingServer
+        if (options.stdin) {
+            initInputHandler(options, signallingServer);
         }
-    });
-}
+
+        if (options.rest_api) {
+            void initialize({
+                app,
+                docsPath: '/api-definition',
+                exposeApiDocs: true,
+                apiDoc: './apidoc/api-definition-base.yml',
+                paths: './dist/paths',
+                dependencies: {
+                    signallingServer
+                }
+            });
+        }
+    } catch (error) {
+        Logger.error('Failed to initialize server:', error);
+        process.exit(1);
+    }
+})();

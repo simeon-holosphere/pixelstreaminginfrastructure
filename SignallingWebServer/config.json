@@ -23,5 +23,13 @@
 	},
 	"log_config": true,
 	"stdin": false,
-	"console_messages": "verbose"
+	"console_messages": "verbose",
+	"ngrok": {
+		"enabled": true,
+		"authToken": "2szPlt5ptkNRJz6cQDw7Q5PKH41_UVM7K3tMsY9SjoFMZSCQ",
+		"basicAuth": {
+			"username": "admin",
+			"password": "adminpassword123"
+		}
+	}
 }
