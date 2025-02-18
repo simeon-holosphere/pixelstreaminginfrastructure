@@ -2,13 +2,13 @@ import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import {
-    SignallingServer,
-    IServerConfig,
     WebServer,
     InitLogging,
     Logger,
-    IWebServerConfig
-} from '@epicgames-ps/lib-pixelstreamingsignalling-ue5.5';
+    IWebServerConfig,
+    SignallingServer,
+    IServerConfig
+} from "../../Signalling";
 import { beautify, IProgramOptions } from './Utils';
 import { initInputHandler } from './InputHandler';
 import { Command, Option } from 'commander';

@@ -4,7 +4,7 @@ import {
     Messages,
     MessageHelpers,
     BaseMessage,
-    EventEmitter
+    EventEmitter as PixelStreamingEventEmitter
 } from '@epicgames-ps/lib-pixelstreamingcommon-ue5.5';
 import { Logger } from './Logger';
 import { IMessageLogger } from './LoggingUtils';
@@ -14,7 +14,7 @@ import { IPlayerInfo } from './PlayerRegistry';
  * An interface that describes a streamer that can be added to the
  * streamer registry.
  */
-export interface IStreamer extends EventEmitter, IMessageLogger {
+export interface IStreamer extends PixelStreamingEventEmitter, IMessageLogger {
     streamerId: string;
     transport: ITransport;
     protocol: SignallingProtocol;
@@ -24,6 +24,8 @@ export interface IStreamer extends EventEmitter, IMessageLogger {
 
     sendMessage(message: BaseMessage): void;
     getStreamerInfo(): IStreamerInfo;
+    // Add the emit method with the same signature as your EventEmitter class
+    emit(eventName: string, ...args: any[]): boolean;
 }
 
 /**
@@ -45,7 +47,7 @@ export interface IStreamerInfo {
  *   'added': (playerId: string) Player was added.
  *   'removed': (playerId: string) Player was removed.
  */
-export class StreamerRegistry extends EventEmitter {
+export class StreamerRegistry extends PixelStreamingEventEmitter {
     streamers: IStreamer[];
     defaultStreamerIdPrefix: string = 'UnknownStreamer';
 
@@ -53,6 +55,12 @@ export class StreamerRegistry extends EventEmitter {
         super();
         this.streamers = [];
     }
+    
+    override emit(eventName: string, ...args: any[]): boolean {
+        return super.emit(eventName, ...args);
+    }
+
+
 
     /**
      * Adds a streamer to the registry. If the streamer already has an id
@@ -133,6 +141,7 @@ export class StreamerRegistry extends EventEmitter {
     count(): number {
         return this.streamers.length;
     }
+    private onEndpointId(streamer: IStreamer, message: Messages.endpointId): void;
 
     private onEndpointId(streamer: IStreamer, message: Messages.endpointId): void {
         const oldId = streamer.streamerId;
@@ -148,7 +157,7 @@ export class StreamerRegistry extends EventEmitter {
             MessageHelpers.createMessage(Messages.endpointIdConfirm, { committedId: streamer.streamerId })
         );
     }
-
+    private sanitizeStreamerId(id: string): string;
     private sanitizeStreamerId(id: string): string {
         // create a default id if none supplied
         if (!id) {

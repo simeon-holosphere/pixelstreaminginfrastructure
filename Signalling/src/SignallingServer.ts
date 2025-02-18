@@ -1,13 +1,14 @@
 import http from 'http';
 import https from 'https';
 import WebSocket from 'ws';
-import ngrok from '@ngrok/ngrok';
+import * as ngrok from '@ngrok/ngrok';
 import { StreamerConnection } from './StreamerConnection';
 import { PlayerConnection } from './PlayerConnection';
 import { SFUConnection } from './SFUConnection';
 import { Logger } from './Logger';
 import { StreamerRegistry } from './StreamerRegistry';
 import { PlayerRegistry } from './PlayerRegistry';
+// @ts-ignore
 import { Messages, MessageHelpers, SignallingProtocol } from '@epicgames-ps/lib-pixelstreamingcommon-ue5.5';
 import { stringify } from './Utils';
 
@@ -144,7 +145,8 @@ export class SignallingServer {
                 ngrokConfig.authtoken_from_env = false;
                 ngrokConfig.basic_auth = basicAuthConfig;
             }
-
+            
+            // const ngrok = require('ngrok');
             this.ngrokListener = await ngrok.forward(ngrokConfig);
 
             const publicUrl = this.ngrokListener.url();
