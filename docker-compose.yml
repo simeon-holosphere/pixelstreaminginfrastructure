@@ -1,0 +1,16 @@
+﻿services:
+  pixelstreaming:
+    image: replicated99/pixelstreaming:1.0.6
+    build: .
+    ports:
+      - "8883-8893:8888"
+      - "8076-8086:8081"
+      - "8884-8894:8889"
+    environment:
+      - STREAMER_PORT=8888
+      - PLAYER_PORT=8081
+      - SFU_PORT=8889
+      - NGROK_AUTH_TOKEN=your_token
+      - NGROK_USERNAME=admin
+      - NGROK_PASSWORD=your_password
+    command: bash SignallingWebServer/platform_scripts/bash/start.sh --nosudo

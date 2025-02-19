@@ -2,9 +2,9 @@
 	"log_folder": "logs",
 	"log_level_console": "info",
 	"log_level_file": "info",
-	"streamer_port": "8888",
-	"player_port": "8081",
-	"sfu_port": "8889",
+	"streamer_port": "$STREAMER_PORT",
+	"player_port": "$PLAYER_PORT",
+	"sfu_port": "$SFU_PORT",
 	"serve": true,
 	"http_root": "D:\\PixelStreamingInfrastructure\\SignallingWebServer\\www",
 	"homepage": "player.html",
@@ -26,10 +26,10 @@
 	"console_messages": "verbose",
 	"ngrok": {
 		"enabled": true,
-		"authToken": "2szPlt5ptkNRJz6cQDw7Q5PKH41_UVM7K3tMsY9SjoFMZSCQ",
+		"authToken": "$NGROK_AUTH_TOKEN",
 		"basicAuth": {
-			"username": "admin",
-			"password": "adminpassword123"
+			"username": "$NGROK_USERNAME",
+			"password": "$NGROK_PASSWORD"
 		}
 	}
 }

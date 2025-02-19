@@ -517,7 +517,8 @@ export class PixelStreamingApplicationStyle {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(0, 26, 41, 0.95)'
+            backgroundColor: 'rgba(0,0,0,0)'
+           // backgroundColor: 'rgba(0, 26, 41, 0.95)'
         },
         '#authContainer > div': {
             width: '384px',

@@ -145,17 +145,16 @@ export class SignallingServer {
                 ngrokConfig.authtoken_from_env = false;
                 ngrokConfig.basic_auth = basicAuthConfig;
             }
-            
-            // const ngrok = require('ngrok');
-            this.ngrokListener = await ngrok.forward(ngrokConfig);
 
+            this.ngrokListener = await ngrok.forward(ngrokConfig);
             const publicUrl = this.ngrokListener.url();
+
             Logger.info(`Ngrok tunnel established at: ${publicUrl}`);
-            
+
             if (this.protocolConfig['peerConnectionOptions']) {
                 this.protocolConfig['peerConnectionOptions']['publicUrl'] = publicUrl;
             }
-        } catch(error) {
+        } catch (error) {
             Logger.error('Failed to setup ngrok: ', error);
             if (error instanceof Error) {
                 throw new Error(`Ngrok setup failed: ${error.message}`);
@@ -164,9 +163,9 @@ export class SignallingServer {
             }
         }
     }
+    
     //if (this.protocolConfig['peerConnectionOptions']) {
     //this.protocolConfig['peerConnectionOptions']['publicUrl'] = publicUrl;
-
     
     private async setupWebSocketServers() {
         // Streamer connections
