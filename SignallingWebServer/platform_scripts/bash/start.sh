@@ -35,6 +35,7 @@ cat << EOF > $config
 	"ngrok": {
 		"enabled": true,
 		"authToken": "${NGROK_AUTH_TOKEN}",
+		"domain": "${NGROK_DOMAIN}",
 		"basicAuth": {
 			"username": "${NGROK_USERNAME}",
 			"password": "${NGROK_PASSWORD}"

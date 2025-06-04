@@ -51,6 +51,7 @@ export interface IServerConfig {
     ngrok?: {
         enabled: boolean;
         authToken?: string;
+        domain?: string;  
         oauth?: {
             provider: string;
             allow_emails: string[];
@@ -130,6 +131,11 @@ export class SignallingServer {
                 authtoken: this.config.ngrok?.authToken
             };
 
+            // Add domain support for ngrok Pro
+            if (this.config.ngrok?.domain) {
+                ngrokConfig.domain = this.config.ngrok.domain;
+            }
+
             // Handle OAuth configuration
             if (this.config.ngrok?.oauth) {
                 const oauthConfig = {
@@ -142,7 +148,6 @@ export class SignallingServer {
             // Handle basic auth configuration
             if (this.config.ngrok?.basicAuth) {
                 const basicAuthConfig = `${this.config.ngrok.basicAuth.username}:${this.config.ngrok.basicAuth.password}`;
-                ngrokConfig.authtoken_from_env = false;
                 ngrokConfig.basic_auth = basicAuthConfig;
             }
 
