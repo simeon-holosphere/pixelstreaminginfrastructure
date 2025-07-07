@@ -112,7 +112,21 @@ export class Application {
     constructor(options: UIOptions) {
         this._options = options;
 
+        // FIRST: Assign the stream
         this.stream = options.stream;
+
+        // THEN: Set the flag and log
+        console.log('=== DEBUG: Setting HoveringMouseMode ===');
+        console.log('Stream exists:', !!this.stream);
+        console.log('Stream config exists:', !!this.stream?.config);
+
+        try {
+            this.stream.config.setFlagEnabled(Flags.HoveringMouseMode, true);
+            console.log('✅ HoveringMouseMode enabled:', this.stream.config.isFlagEnabled(Flags.HoveringMouseMode));
+            console.log('📋 Available flags:', Object.keys(Flags));
+        } catch (error) {
+            console.error('❌ Error setting HoveringMouseMode:', error);
+        }
 
         // Explicitly create ui features now so creation time is known
         this._uiFeatureElement = this.createUIFeaturesElement();
@@ -151,6 +165,9 @@ export class Application {
         this.showConnectOrAutoConnectOverlays();
 
         this.setColorMode(this.configUI.isCustomFlagEnabled(ExtraFlags.LightMode));
+
+        // Double-check the flag is still set after all initialization
+        console.log('🔍 Final check - HoveringMouseMode enabled:', this.stream.config.isFlagEnabled(Flags.HoveringMouseMode));
 
         this.stream.config._addOnSettingChangedListener(Flags.HideUI, (isEnabled: boolean) => {
             this._uiFeatureElement.style.visibility = isEnabled ? 'hidden' : 'visible';

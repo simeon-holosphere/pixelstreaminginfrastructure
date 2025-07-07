@@ -13,7 +13,6 @@ import { UIElementConfig, UIElementCreationMode } from '../UI/UIConfigurationTyp
  * to use an externally provided element, or to disable the element entirely.
  */
 export type ControlsUIConfiguration = {
-    //[Property in keyof Controls as `${Property}Type`]? : UIElementType;
     statsButtonType?: UIElementConfig;
     fullscreenButtonType?: UIElementConfig;
     settingsButtonType?: UIElementConfig;
