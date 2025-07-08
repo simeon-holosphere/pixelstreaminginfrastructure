@@ -17,7 +17,7 @@ export interface ColorPalette {
 
 export class PixelStreamingApplicationStyle {
     defaultLightModePalette: ColorPalette = {
-        '--color0': '#e2e0dd80',
+        '--color0': '#183231',
         '--color1': '#FFFFFF',
         '--color2': '#000000',
         '--color3': '#0585fe',
@@ -28,8 +28,8 @@ export class PixelStreamingApplicationStyle {
     };
 
     defaultDarkModePalette: ColorPalette = {
-        '--color0': '#1d1f22e0',
-        '--color1': '#000000',
+        '--color0': '#183231',
+        '--color1': '#183231',
         '--color2': '#FFFFFF',
         '--color3': '#0585fe',
         '--color4': '#35b350',
@@ -40,8 +40,8 @@ export class PixelStreamingApplicationStyle {
 
     defaultStyles = {
         ':root': {
-            '--color0': '#1d1f22e0',
-            '--color1': '#000000',
+            '--color0': '#183231',
+            '--color1': '#183231',
             '--color2': '#FFFFFF',
             '--color3': '#0585fe',
             '--color4': '#35b350',

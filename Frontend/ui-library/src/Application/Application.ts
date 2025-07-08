@@ -110,8 +110,9 @@ export class Application {
      * @param options - Initialization options
      */
     constructor(options: UIOptions) {
+        
         this._options = options;
-
+        
         // FIRST: Assign the stream
         this.stream = options.stream;
 
@@ -151,14 +152,14 @@ export class Application {
             this.uiFeaturesElement.appendChild(this.settingsPanel.rootElement);
             this.configureSettings();
         }
+        
+        //if (!options.videoQpIndicatorConfig || !options.videoQpIndicatorConfig.disableIndicator) {
+        //    // Add the video stream QP indicator
+        //    this.videoQpIndicator = new VideoQpIndicator(options.videoQpIndicatorConfig);
+        //    this.uiFeaturesElement.appendChild(this.videoQpIndicator.rootElement);
+        //}
 
-        if (!options.videoQpIndicatorConfig || !options.videoQpIndicatorConfig.disableIndicator) {
-            // Add the video stream QP indicator
-            this.videoQpIndicator = new VideoQpIndicator(options.videoQpIndicatorConfig);
-            this.uiFeaturesElement.appendChild(this.videoQpIndicator.rootElement);
-        }
-
-        this.createButtons();
+        // this.createButtons();
 
         this.registerCallbacks();
 

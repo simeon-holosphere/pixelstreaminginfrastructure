@@ -30,6 +30,8 @@
         "pre-commit": "^1.0.10"
     },
     "dependencies": {
+        "@epicgames-ps/lib-pixelstreamingfrontend-ue5.5": "^0.4.8",
+        "@epicgames-ps/lib-pixelstreamingfrontend-ui-ue5.5": "^0.4.8",
         "@ngrok/ngrok": "^1.4.1",
         "chocolatey": "^0.0.1"
     }
